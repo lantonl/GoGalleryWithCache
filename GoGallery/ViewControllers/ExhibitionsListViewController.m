@@ -6,6 +6,7 @@
 //  Copyright © 2016 goit. All rights reserved.
 //
 
+#import <CoreLocation/CoreLocation.h>
 #import "ExhibitionsListViewController.h"
 #import "ExhibitionDescriptionViewController.h"
 #import "Exhibition.h"
@@ -22,7 +23,7 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
 
 
 
-@interface ExhibitionsListViewController() <UITableViewDataSource, UITableViewDelegate>
+@interface ExhibitionsListViewController() <UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate>
 
 @property (weak, nonatomic)   IBOutlet UITableView *tableView;
 @property (strong, nonatomic) IBOutlet UIButton *openMenuButton;
@@ -30,18 +31,17 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
 
 @property (strong, nonatomic) NSString   *requestString;
 @property (assign, nonatomic) NSUInteger loadedGalleries;
+
+@property (strong, nonatomic) CLLocation *userLocation;
+
 @end
 
 
 
-@implementation ExhibitionsListViewController
-
-
-
-
-
-
-
+@implementation ExhibitionsListViewController{
+    CLLocationManager *locationManager;
+    
+}
 
 
 - (void) viewDidLoad {
@@ -54,6 +54,12 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
     self.openMenuButton.layer.cornerRadius        = 12.0;
     self.openMenuButton.layer.borderWidth         = 2.0;
     [self.openMenuButton setImage:[UIImage imageNamed:@"arrowdown.png"] forState:UIControlStateNormal];
+    
+    locationManager = [[CLLocationManager alloc] init];
+    [self getCurrentLocation];
+    
+    
+    
     self.requestString = kNotSortedGalleriesRequest;
     [[EventsModel sharedModel] loadDataWithSkipCounterAndSortString:kFirstSkip
                                                       andSortString:self.requestString
@@ -62,6 +68,9 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
                                                             [self.tableView reloadData];
                                                         });
                                                     }];
+    
+    
+    
 }
 
 
@@ -83,7 +92,6 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
                                                      andCompletionBlock:^{
                                                               dispatch_async(dispatch_get_main_queue(), ^{
                                                                   [self.tableView reloadData];
-                                                                  NSLog(@"WILL DISPLAY CELL CALLED");
                                                               });
                                                           }];
 }
@@ -103,7 +111,7 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell *cell  = [tableView dequeueReusableCellWithIdentifier:                                 kCellExhibitionIdentifier];
     Exhibition* exhibition = (Exhibition*)[[[EventsModel sharedModel]events]objectAtIndex:indexPath.row];
-    [(CellExhibition*)cell configureWithExhibition:exhibition];
+    [(CellExhibition*)cell configureWithExhibition:exhibition andLocation:self.userLocation];
     return cell;
 }
 
@@ -114,6 +122,55 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
     ExhibitionDescriptionViewController* viewController = segue.destinationViewController;
     viewController.exhibition = (Exhibition*)sender;
 }
+
+
+
+#pragma mark - Get Current Location
+
+
+- (void)getCurrentLocation{
+    locationManager.delegate = self;
+    locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    if ([locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
+        [locationManager requestAlwaysAuthorization];
+    }
+    [locationManager startUpdatingLocation];
+}
+
+
+
+#pragma mark - CLLocationManagerDelegate
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    
+    NSLog(@"didFailWithError: %@", error);
+    
+    UIAlertController *errorAlert = [UIAlertController alertControllerWithTitle:@"Error" message:@"Failed to Get Your Location" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+    [errorAlert addAction:ok];
+    
+    [self presentViewController:errorAlert animated:YES completion:nil];
+}
+
+
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+  
+    CLLocation *currentLocation = newLocation;
+    
+    if (currentLocation != nil) {
+        self.userLocation = [[CLLocation alloc]initWithLatitude:currentLocation.coordinate.latitude longitude: currentLocation.coordinate.longitude];
+        [locationManager stopUpdatingLocation];
+    }
+}
+
+
+
+
+
+
 
 #pragma mark - Buttons Action
 
@@ -139,8 +196,6 @@ static NSString     *kOpeningGalleriesRequest     = @"/opening";
 
 - (IBAction)didTouchNearMeButton:(id)sender {
     [self.openMenuButton setTitle:@"Near me" forState:UIControlStateNormal];
-    User* user = [[User alloc]init];
-    [user getCurrentLocation];
     self.menuViewConstraint.constant = 0;
     [UIView animateWithDuration:1.0 animations:^{
         [self.view layoutIfNeeded];

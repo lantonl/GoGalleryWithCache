@@ -12,8 +12,8 @@
 @interface User : NSObject <CLLocationManagerDelegate>
 
 
-- (void)getCurrentLocation;
-//@property (strong, nonatomic) CLLocation* currentUserLocation;
-//@property (strong, nonatomic) CLLocationManager* locationManager;
+
+
+
 
 @end

@@ -17,10 +17,10 @@
 @property (weak, nonatomic) IBOutlet UILabel *exhibitionNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *authorExhibitionLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *exhibitionPreviewImage;
+@property (strong, nonatomic) IBOutlet UILabel *distance;
 
 
 
-
-- (void)configureWithExhibition:(Exhibition *) exhibition;
+- (void)configureWithExhibition:(Exhibition *)exhibition andLocation:(CLLocation *)userLocation;
 
 @end

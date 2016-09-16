@@ -25,6 +25,14 @@
 @implementation galleryDescriptionViewController
 
 
+- (void) viewDidLoad {
+    [super viewDidLoad];
+    self.tableView.separatorStyle                 = UITableViewCellSeparatorStyleNone;
+}
+
+
+
+
 #pragma mark - UITableViewDataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     return 5;

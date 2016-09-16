@@ -57,6 +57,7 @@ static NSString *kCellArtworkIdentifier = @"cellArtwork";
     self.navigationController.navigationBarHidden = NO;
     self.navigationController.navigationBar.barTintColor = [UIColor blackColor];
     self.navigationController.navigationBar.backgroundColor = [UIColor blackColor];
+    self.navigationController.navigationBar.alpha = 1;
     self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
     
     self.tableViewContainerConstraint.constant = 0;
@@ -153,10 +154,8 @@ static NSString *kCellArtworkIdentifier = @"cellArtwork";
         self.galleryAbout.text = self.exhibition.gallery.about;
         [UIView animateWithDuration:1.0 animations:^{
             [self.view layoutIfNeeded];
-            //            self.infoButton.transform = CGAffineTransformMakeRotation(360.0*M_PI/360.0);
-            CGFloat radians = atan2f(self.infoButton.transform.b, self.infoButton.transform.a);
-            CGFloat degrees = radians * (180 / M_PI);
-            CGAffineTransform transform = CGAffineTransformMakeRotation((180 - degrees) * M_PI/180);
+              CGFloat arrowDown = -1;
+            CGAffineTransform transform = CGAffineTransformMakeRotation(((arrowDown != 1)? -M_PI:-0.000001));
             self.infoButton.transform = transform;
         }];
         self.isShown = true;
@@ -166,7 +165,7 @@ static NSString *kCellArtworkIdentifier = @"cellArtwork";
         self.galleryAbout.text = @"";
         [UIView animateWithDuration:1.0 animations:^{
             [self.view layoutIfNeeded];
-            CGAffineTransform transform = CGAffineTransformMakeRotation(-M_PI);
+            CGAffineTransform transform = CGAffineTransformMakeRotation(-0.000001);
             self.infoButton.transform = transform;
             //         self.infoButton.transform = CGAffineTransformMakeRotation(0.0*M_PI/360.0);
         }];
@@ -174,7 +173,7 @@ static NSString *kCellArtworkIdentifier = @"cellArtwork";
     }
 }
 
-#pragma mark - logo loader
+
 
 
 
